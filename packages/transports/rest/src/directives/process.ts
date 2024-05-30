@@ -8,6 +8,7 @@ import {
   isSpecifiedScalarType,
   isUnionType,
 } from 'graphql';
+import { IStringifyOptions } from 'qs';
 import { ObjMapScalar } from '@graphql-mesh/transport-common';
 import { Logger, MeshFetch, MeshPubSub } from '@graphql-mesh/types';
 import { getDefDirectives } from '@graphql-mesh/utils';
@@ -167,7 +168,12 @@ export function processDirectives(
                 logger,
               });
               break;
-            case 'httpOperation':
+            case 'httpOperation': {
+              const operationConfig =
+                ((
+                  'operations' in globalOptions &&
+                  (globalOptions.operations as any[]).find(o => o.field === field.name)
+                )?.queryStringOptions as IStringifyOptions) ?? {};
               addHTTPRootFieldResolver(
                 schema,
                 field as GraphQLField<any, any>,
@@ -198,9 +204,13 @@ export function processDirectives(
                       : directiveAnnotation.args.queryStringOptionsByParam,
                   jsonApiFields: directiveAnnotation.args.jsonApiFields,
                 },
-                globalOptions as GlobalOptions,
+                {
+                  ...globalOptions,
+                  queryStringOptions: { ...globalOptions?.queryStringOptions, ...operationConfig },
+                } as GlobalOptions,
               );
               break;
+            }
             case 'responseMetadata':
               processResponseMetadataAnnotations(field as GraphQLField<any, any>);
               break;
