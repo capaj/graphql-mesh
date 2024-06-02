@@ -287,6 +287,8 @@ export function addHTTPRootFieldResolver(
                 }
               } else if (typeof queryParamVal === 'object') {
                 searchParams.append(key, JSON.stringify(queryParamVal));
+              } else if (typeof queryParamVal === 'string') {
+                searchParams.append(key, queryParamVal);
               }
             }
             queryParamsString = searchParams.toString();
